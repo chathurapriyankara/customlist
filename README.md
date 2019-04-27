@@ -2,6 +2,7 @@ This is how you can create a list view which retrieve list items from a web serv
 two thirdparty libraris.
 1. Volley
 2. Picasso
+
 Following is a demo of the application.
 
 
