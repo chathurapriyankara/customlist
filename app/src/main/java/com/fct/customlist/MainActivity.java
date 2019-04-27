@@ -9,28 +9,68 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-
+    private List<Pizza> pizzaDetails = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ListView pizzaList = findViewById(R.id.listView);
-        List<String> pizzaDetails = new ArrayList<>();
-        pizzaDetails.add("One");
-        pizzaDetails.add("Two");
-        pizzaDetails.add("Three");
-        CustomAdapter listAdapter = new CustomAdapter(this, R.layout.list_item, pizzaDetails);
-        pizzaList.setAdapter(listAdapter);
+
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String url ="http://192.168.8.100:8080/demo/all";
+
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url,
+                null, new HTTPResponseListner(), null);
+        queue.add(request);
     }
 
-    private class CustomAdapter extends ArrayAdapter<String>{
-        private List<String> itemsList;
+    class HTTPResponseListner implements Response.Listener<JSONArray>{
+        @Override
+        public void onResponse(JSONArray jsonArray) {
+            for(int i = 0; i < jsonArray.length(); i++) {
+                try {
+                    JSONObject object= jsonArray.getJSONObject(i);
+                    Pizza pizza = new Pizza();
+                    pizza.setPizzaId(Integer.parseInt(object.get("pizzaId").toString()));
+                    pizza.setName(object.get("name").toString());
+                    pizzaDetails.add(pizza);
 
-        CustomAdapter(Context context, int resource, List<String> items) {
+                    ListView pizzaList = findViewById(R.id.listView);
+                    CustomAdapter listAdapter = new CustomAdapter(getApplicationContext(), R.layout.list_item, pizzaDetails);
+                    pizzaList.setAdapter(listAdapter);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    class HTTPErrorListner implements Response.ErrorListener {
+        @Override
+        public void onErrorResponse(VolleyError error) {
+        }
+    }
+
+    private class CustomAdapter extends ArrayAdapter<Pizza>{
+        private List<Pizza> itemsList;
+
+        CustomAdapter(Context context, int resource, List<Pizza> items) {
             super(context, resource, items);
             itemsList = items;
         }
@@ -41,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
                 convertView = getLayoutInflater().from(getContext()).inflate(R.layout.list_item, parent, false);
             }
             TextView tv =  convertView.findViewById(R.id.textView);
-            tv.setText(itemsList.get(position));
+            tv.setText(itemsList.get(position).getName());
             return convertView;
         }
     }
