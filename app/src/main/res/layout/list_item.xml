@@ -12,4 +12,10 @@
         android:text="TextView"
         android:gravity="center_vertical"
         android:textSize="20sp"/>
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="60dp"
+        android:layout_height="45dp"
+        android:layout_weight="1"/>
 </LinearLayout>

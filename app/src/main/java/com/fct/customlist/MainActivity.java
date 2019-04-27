@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -14,8 +15,8 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -31,12 +32,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         RequestQueue queue = Volley.newRequestQueue(this);
         String url ="http://192.168.8.100:8080/demo/all";
 
         JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url,
-                null, new HTTPResponseListner(), null);
+                null, new HTTPResponseListner(), new HTTPErrorListner());
         queue.add(request);
     }
 
@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
                     Pizza pizza = new Pizza();
                     pizza.setPizzaId(Integer.parseInt(object.get("pizzaId").toString()));
                     pizza.setName(object.get("name").toString());
+                    pizza.setImageURL(object.get("imageUrl").toString());
                     pizzaDetails.add(pizza);
 
                     ListView pizzaList = findViewById(R.id.listView);
@@ -80,8 +81,11 @@ public class MainActivity extends AppCompatActivity {
             if(convertView == null) {
                 convertView = getLayoutInflater().from(getContext()).inflate(R.layout.list_item, parent, false);
             }
+            Pizza item = itemsList.get(position);
             TextView tv =  convertView.findViewById(R.id.textView);
-            tv.setText(itemsList.get(position).getName());
+            ImageView iv = convertView.findViewById(R.id.imageView);
+            Picasso.get().load(item.getImageURL()).into(iv);
+            tv.setText(item.getName());
             return convertView;
         }
     }
